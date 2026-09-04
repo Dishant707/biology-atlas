@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>biology-atlas — an open, interactive 3D biology atlas</title>
+<title>Open Biology Viewer</title>
 <style>
   :root {
     --bg: #0e1118;
@@ -12,8 +12,6 @@
     --text: #e6edf3;
     --muted: #8b949e;
     --accent: #58a6ff;
-    --red: #d6483f;
-    --blue: #4a7dd6;
   }
   * { box-sizing: border-box; }
   body {
@@ -38,8 +36,6 @@
     text-decoration: none; padding: 12px 22px; border-radius: 8px; font-size: 15px;
   }
   .cta:hover { filter: brightness(1.1); }
-  .cta.ghost { background: transparent; color: var(--accent); border: 1px solid var(--border); margin-left: 10px; }
-
   h2 { font-size: 22px; margin: 48px 0 16px; }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
   .card {
@@ -54,10 +50,8 @@
   .tag { font-size: 11px; color: #3fb950; border: 1px solid #2c5a3c; border-radius: 999px; padding: 2px 8px; margin-left: 8px; vertical-align: 2px; }
   .tag.soon { color: var(--muted); border-color: var(--border); }
   .soon .icon, .soon h3, .soon p { opacity: 0.55; }
-
   .audience { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
   .audience .card { pointer-events: none; }
-
   footer {
     margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--border);
     color: var(--muted); font-size: 12px;
@@ -68,77 +62,53 @@
 <body>
 <div class="wrap">
 
-  <div class="badge">open source · CC BY-SA data</div>
-  <h1>biology-<span>atlas</span></h1>
+  <div class="badge">open · CC BY-SA data</div>
+  <h1>Open Biology <span>Viewer</span></h1>
   <p class="lead">
-    An open, interactive 3D atlas of the human body — from molecules to organs.
-    Every model is built from code and open data, dissectable in your browser,
-    downloadable, and traceable to a canonical source.
+    Explore and dissect real human anatomy in your browser — free, open, and built
+    from code.
   </p>
   <a class="cta" href="web/">Explore the heart</a>
-  <a class="cta ghost" href="https://github.com/Dishant707/biology-atlas">View on GitHub</a>
 
   <h2>Models</h2>
   <div class="grid">
     <a class="card" href="web/">
       <div class="icon">❤️</div>
       <h3>Human Heart <span class="tag">live</span></h3>
-      <p>11 dissectable parts — chambers, valves, great vessels, coronary circulation. Real anatomy from BodyParts3D, mapped to the FMA ontology.</p>
+      <p>11 dissectable parts — chambers, vessels, coronary circulation.</p>
     </a>
     <a class="card" href="web/brain/">
       <div class="icon">🧠</div>
       <h3>Human Brain <span class="tag">live</span></h3>
-      <p>8 dissectable parts — color-coded lobes, cerebellum, brainstem. Real anatomy from BodyParts3D, mapped to the FMA ontology.</p>
+      <p>8 dissectable parts — color-coded lobes, cerebellum, brainstem.</p>
     </a>
     <div class="card soon">
       <div class="icon">🧬</div>
       <h3>Molecules &amp; machines <span class="tag soon">soon</span></h3>
-      <p>ATP synthase, ribosome, kinesin — atomic structures from the PDB.</p>
+      <p>ATP synthase, ribosome, kinesin.</p>
     </div>
     <div class="card soon">
       <div class="icon">🦠</div>
       <h3>Cells &amp; organelles <span class="tag soon">soon</span></h3>
-      <p>Real cell models from Allen Institute for Cell Science.</p>
+      <p>Real cell models.</p>
     </div>
     <div class="card soon">
       <div class="icon">🫁</div>
       <h3>Organs &amp; systems <span class="tag soon">soon</span></h3>
-      <p>Lungs, kidney, liver, and more from open anatomy data.</p>
+      <p>Lungs, kidney, liver, and more.</p>
     </div>
   </div>
 
   <h2>Built for</h2>
   <div class="audience">
     <div class="card"><div class="icon">🎓</div><h3>Learners</h3><p>Click, dissect, and explore — no textbook required.</p></div>
-    <div class="card"><div class="icon">🏫</div><h3>Teachers</h3><p>Embed and download freely. Every part is labelled and sourced.</p></div>
-    <div class="card"><div class="icon">🔬</div><h3>Researchers</h3><p>Traceable IDs, reproducible pipeline, open license.</p></div>
+    <div class="card"><div class="icon">🏫</div><h3>Teachers</h3><p>Embed and use freely. Every part is labelled and sourced.</p></div>
+    <div class="card"><div class="icon">🔬</div><h3>Researchers</h3><p>Traceable IDs, open data, reproducible.</p></div>
   </div>
-
-  <h2>Open for learning · paid for use</h2>
-  <div class="audience">
-    <div class="card">
-      <div class="icon">🎓</div><h3>Free — view &amp; learn</h3>
-      <p>The atlas is open source so anyone can view, explore, and learn anatomy for free.</p>
-    </div>
-    <div class="card">
-      <div class="icon">🤝</div><h3>Commercial use</h3>
-      <p>Want it in your app, course, or product? Contact me first for a license.</p>
-    </div>
-    <div class="card">
-      <div class="icon">💎</div><h3>Custom models</h3>
-      <p>Need a specific organ, cell, or molecule built? Custom builds are made for you — contact me.</p>
-    </div>
-  </div>
-  <p style="color:var(--muted); font-size:13px; margin:18px 0 0;">
-    <b style="color:var(--text)">Open for learning is free.</b> For commercial use or a custom model, <b style="color:var(--text)">get in touch first.</b>
-  </p>
-  <a class="cta" href="mailto:dishantwork55@gmail.com?subject=Custom%203D%20biology%20model" style="margin-top:18px;">Contact me — custom / commercial</a>
-  <a class="cta ghost" href="https://github.com/sponsors/Dishant707">❤️ Sponsor</a>
 
   <footer>
-    Code: <a href="LICENSE">MIT</a> · 3D models: <a href="models/LICENSE.md">CC BY-SA 2.1 JP</a> ·
-    Attribution: "BodyParts3D, (c) The Database Center for Life Science" ·
-    <a href="https://github.com/Dishant707/biology-atlas">GitHub</a>
+    <a href="https://www.linkedin.com/in/YOUR_HANDLE">LinkedIn</a> ·
+    3D models: BodyParts3D, (c) The Database Center for Life Science licensed under CC BY-SA 2.1 JP
   </footer>
 
 </div>
