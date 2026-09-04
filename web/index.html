@@ -164,8 +164,10 @@ async function loadHeart() {
 
   let loadedCount = 0, total = 0;
   for (const k of Object.keys(manifest)) total += manifest[k].length;
+  const loadingEl = document.getElementById('loading');
 
-  for (const [partKey, files] of Object.entries(manifest)) {
+  const mats = {}, groups = {};
+  for (const partKey of Object.keys(manifest)) {
     const def = DEFS[partKey];
     const isVessel = ['coronary_arteries','coronary_veins','aorta','pulmonary_trunk','svc','ivc','pulmonary_veins'].includes(partKey);
     const mat = new THREE.MeshPhysicalMaterial({
@@ -177,22 +179,31 @@ async function loadHeart() {
       clearcoat: isVessel ? 0.5 : 0.0,
       clearcoatRoughness: 0.4,
     });
+    mats[partKey] = mat;
     const group = new THREE.Group();
     group.userData.partKey = partKey;
-    for (const f of files) {
-      try {
-        const obj = await loader.loadAsync(`../models/partof_BP3D_4.0_obj_99/${f}.obj`);
-        obj.traverse((o) => { if (o.isMesh) { o.material = mat; o.userData.partKey = partKey; } });
-        group.add(obj);
-      } catch (e) { console.warn('failed', f, e); }
-      loadedCount++;
-      document.getElementById('loading').textContent = `Loading heart parts… ${loadedCount}/${total}`;
-    }
     const label = makeLabel(def.name);
     group.add(label);
     modelRoot.add(group);
+    groups[partKey] = group;
     parts.push({ key: partKey, group, label, def, meshes: [] });
   }
+
+  /* load all meshes in parallel (GitHub Pages serves over HTTP/2) */
+  await Promise.all(Object.entries(manifest).flatMap(([partKey, files]) =>
+    files.map((f) =>
+      loader.loadAsync(`../models/partof_BP3D_4.0_obj_99/${f}.obj`)
+        .then((obj) => {
+          obj.traverse((o) => { if (o.isMesh) { o.material = mats[partKey]; o.userData.partKey = partKey; } });
+          groups[partKey].add(obj);
+        })
+        .catch((e) => console.warn('failed', f, e))
+        .finally(() => {
+          loadedCount++;
+          loadingEl.textContent = `Loading heart parts… ${loadedCount}/${total}`;
+        })
+    )
+  ));
 
   /* centre + scale the whole model, then orient it */
   const box = new THREE.Box3().setFromObject(modelRoot);
