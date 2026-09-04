@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Human Heart — Real Anatomy (BodyParts3D)</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #10131a; font-family: system-ui, -apple-system, sans-serif; }
+  canvas { display: block; }
+  #panel {
+    position: fixed; top: 16px; left: 16px; z-index: 10;
+    background: rgba(16,19,26,0.9); border: 1px solid #30363d; border-radius: 10px;
+    padding: 14px 16px; color: #e6edf3; width: 290px; backdrop-filter: blur(6px);
+  }
+  #panel h1 { font-size: 15px; margin: 0 0 6px; }
+  #panel p { font-size: 12px; color: #8b949e; margin: 0 0 12px; line-height: 1.4; }
+  .row { display: flex; align-items: center; justify-content: space-between; font-size: 12px; margin-bottom: 9px; gap: 8px; }
+  .row label { color: #c9d1d9; white-space: nowrap; }
+  button { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; border-radius: 6px; padding: 5px 12px; font-size: 12px; cursor: pointer; }
+  button:hover { background: #30363d; }
+  #dissectBtn { border-color: #3fb950; color: #3fb950; }
+  #stats { margin-top: 10px; font-size: 11px; color: #8b949e; border-top: 1px solid #30363d; padding-top: 8px; line-height: 1.5; }
+  #stats b { color: #c9d1d9; }
+  #hoverInfo { margin-top: 8px; font-size: 12px; color: #58a6ff; min-height: 16px; }
+  #loading { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; color: #8b949e; font-size: 14px; z-index: 5; }
+  .part-label { color: #e6edf3; background: rgba(22,27,34,0.94); border: 1px solid #58a6ff; border-radius: 5px; padding: 2px 8px; font-size: 11px; white-space: nowrap; pointer-events: none; }
+</style>
+</head>
+<body>
+<div id="panel">
+  <h1>Human Heart — Real Anatomy</h1>
+  <p>BodyParts3D data (CC BY-SA 2.1 JP) · blue = oxygen-poor · red = oxygen-rich</p>
+  <div class="row"><label>Dissect</label><button id="dissectBtn">OFF</button></div>
+  <div class="row"><label>Focus</label><button id="focusBtn">ALL</button></div>
+  <div id="stats">Loading…</div>
+  <div id="hoverInfo">Hover a part · click to focus it</div>
+</div>
+<div id="loading">Loading heart parts…</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+
+/* ---------- scene ---------- */
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x10131a);
+const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 200);
+camera.position.set(3.5, 2.5, 7.5);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.body.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 0, 0);
+controls.enableDamping = true;
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0x1a2330, 0.75));
+const key = new THREE.DirectionalLight(0xffffff, 2.0);
+key.position.set(5, 8, 6);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+scene.add(key);
+const rim = new THREE.DirectionalLight(0x88aaff, 0.6);
+rim.position.set(-4, -2, -5);
+scene.add(rim);
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+const labelRenderer = new CSS2DRenderer();
+labelRenderer.setSize(innerWidth, innerHeight);
+labelRenderer.domElement.style.position = 'absolute';
+labelRenderer.domElement.style.top = '0';
+labelRenderer.domElement.style.pointerEvents = 'none';
+document.body.appendChild(labelRenderer.domElement);
+
+/* ---------- parts ---------- */
+const DEFS = {
+  right_atrium:    { name: 'Right atrium',       color: 0x4a7dd6, desc: 'Receives oxygen-poor blood from the body' },
+  left_atrium:     { name: 'Left atrium',        color: 0xd6483f, desc: 'Receives oxygen-rich blood from the lungs' },
+  right_ventricle: { name: 'Right ventricle',    color: 0x3f68b8, desc: 'Pumps oxygen-poor blood to the lungs' },
+  left_ventricle:  { name: 'Left ventricle',     color: 0xc13a31, desc: 'Pumps oxygen-rich blood to the whole body' },
+  aorta:           { name: 'Aorta',              color: 0xb8382e, desc: 'Biggest artery — blood to the body' },
+  pulmonary_trunk: { name: 'Pulmonary trunk',    color: 0x3f68b8, desc: 'Blood to the lungs' },
+  svc:             { name: 'Superior vena cava', color: 0x5a86cc, desc: 'Oxygen-poor blood from the upper body' },
+  ivc:             { name: 'Inferior vena cava', color: 0x5a86cc, desc: 'Oxygen-poor blood from the lower body' },
+  pulmonary_veins: { name: 'Pulmonary veins',    color: 0xe05a4f, desc: 'Oxygen-rich blood from the lungs' },
+  coronary_arteries: { name: 'Coronary arteries', color: 0xc92a2a, desc: 'Vessels that feed the heart muscle itself' },
+  coronary_veins:    { name: 'Coronary veins',    color: 0x3456a8, desc: 'Vessels that drain the heart muscle' },
+};
+/* explode offsets in MODEL millimetres (+Z = up in BodyParts3D) */
+const EXPLODE = {
+  right_atrium:    new THREE.Vector3(30, 12, 42),
+  left_atrium:     new THREE.Vector3(-30, -12, 42),
+  right_ventricle: new THREE.Vector3(38, 12, -40),
+  left_ventricle:  new THREE.Vector3(-38, -12, -40),
+  aorta:           new THREE.Vector3(0, 0, 65),
+  pulmonary_trunk: new THREE.Vector3(-18, 12, 55),
+  svc:             new THREE.Vector3(38, 18, 52),
+  ivc:             new THREE.Vector3(38, 12, -58),
+  pulmonary_veins: new THREE.Vector3(-48, -12, 25),
+  coronary_arteries: new THREE.Vector3(14, 8, 26),
+  coronary_veins:    new THREE.Vector3(-14, -8, -24),
+};
+
+const pivot = new THREE.Group();       // rotated to make "up" point up in the scene
+scene.add(pivot);
+const modelRoot = new THREE.Group();   // scaled + centered, holds the loaded meshes
+pivot.add(modelRoot);
+
+const parts = [];
+const stats = document.getElementById('stats');
+
+/* heartbeat (lub-dub) waveform */
+let heartScale = 1;
+const heartCenter = new THREE.Vector3();
+function heartbeat(t) {
+  const cyc = t % 0.85;
+  const b1 = Math.exp(-Math.pow((cyc - 0.12) / 0.045, 2));
+  const b2 = Math.exp(-Math.pow((cyc - 0.28) / 0.055, 2));
+  return 1 + (b1 * 0.9 + b2 * 0.5) * 0.035;
+}
+
+/* soft ground shadow */
+(function addGroundShadow() {
+  const c = document.createElement('canvas'); c.width = c.height = 256;
+  const x = c.getContext('2d');
+  const g = x.createRadialGradient(128, 128, 20, 128, 128, 128);
+  g.addColorStop(0, 'rgba(0,0,0,0.45)');
+  g.addColorStop(1, 'rgba(0,0,0,0)');
+  x.fillStyle = g; x.fillRect(0, 0, 256, 256);
+  const tex = new THREE.CanvasTexture(c);
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(7, 7), new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false }));
+  m.rotation.x = -Math.PI / 2;
+  m.position.y = -2.6;
+  scene.add(m);
+})();
+
+function makeLabel(text) {
+  const el = document.createElement('div');
+  el.className = 'part-label';
+  el.textContent = text;
+  return new CSS2DObject(el);
+}
+
+/* ---------- load real OBJ data ---------- */
+async function loadHeart() {
+  const res = await fetch('../models/manifest.json');
+  const manifest = await res.json();
+  const loader = new OBJLoader();
+
+  let loadedCount = 0, total = 0;
+  for (const k of Object.keys(manifest)) total += manifest[k].length;
+
+  for (const [partKey, files] of Object.entries(manifest)) {
+    const def = DEFS[partKey];
+    const isVessel = ['coronary_arteries','coronary_veins','aorta','pulmonary_trunk','svc','ivc','pulmonary_veins'].includes(partKey);
+    const mat = new THREE.MeshPhysicalMaterial({
+      color: def.color,
+      metalness: 0.0,
+      roughness: isVessel ? 0.35 : 0.55,
+      sheen: isVessel ? 0.0 : 0.6,
+      sheenColor: 0xffd9cc,
+      clearcoat: isVessel ? 0.5 : 0.0,
+      clearcoatRoughness: 0.4,
+    });
+    const group = new THREE.Group();
+    group.userData.partKey = partKey;
+    for (const f of files) {
+      try {
+        const obj = await loader.loadAsync(`../models/partof_BP3D_4.0_obj_99/${f}.obj`);
+        obj.traverse((o) => { if (o.isMesh) { o.material = mat; o.userData.partKey = partKey; } });
+        group.add(obj);
+      } catch (e) { console.warn('failed', f, e); }
+      loadedCount++;
+      document.getElementById('loading').textContent = `Loading heart parts… ${loadedCount}/${total}`;
+    }
+    const label = makeLabel(def.name);
+    group.add(label);
+    modelRoot.add(group);
+    parts.push({ key: partKey, group, label, def, meshes: [] });
+  }
+
+  /* centre + scale the whole model, then orient it */
+  const box = new THREE.Box3().setFromObject(modelRoot);
+  const center = box.getCenter(new THREE.Vector3());
+  const size = box.getSize(new THREE.Vector3());
+  const scale = 4.5 / Math.max(size.x, size.y, size.z);
+  heartScale = scale;
+  heartCenter.copy(center);
+  modelRoot.scale.setScalar(scale);
+  modelRoot.position.copy(center).multiplyScalar(-scale);
+  pivot.rotation.x = -Math.PI / 2;   // BodyParts3D +Z (up) -> scene +Y
+
+  /* place each label at its part's centre */
+  for (const p of parts) {
+    const pb = new THREE.Box3().setFromObject(p.group);
+    const pc = pb.getCenter(new THREE.Vector3());
+    p.label.position.set(pc.x, pc.y, pc.z + pb.getSize(new THREE.Vector3()).z / 2 + 6);
+    p.group.traverse((o) => { if (o.isMesh) p.meshes.push(o); });
+  }
+
+  document.getElementById('loading').style.display = 'none';
+  stats.innerHTML = `<b>${parts.length}</b> parts · <b>${total}</b> real OBJ meshes<br>Source: BodyParts3D (CC BY-SA 2.1 JP)`;
+  controls.target.set(0, 0, 0);
+  controls.update();
+}
+
+/* ---------- interactions ---------- */
+let dissect = false, explode = 0, focusKey = null;
+document.getElementById('dissectBtn').addEventListener('click', (e) => { dissect = !dissect; e.target.textContent = dissect ? 'ON' : 'OFF'; });
+document.getElementById('focusBtn').addEventListener('click', (e) => { focusKey = null; e.target.textContent = 'ALL'; setVisible(null); });
+
+function setVisible(key) {
+  for (const p of parts) {
+    const show = key === null || p.key === key;
+    for (const m of p.meshes) m.visible = show;
+  }
+}
+
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+const pickMeshes = [];
+const hoverInfo = document.getElementById('hoverInfo');
+
+window.addEventListener('pointermove', (e) => {
+  const rect = renderer.domElement.getBoundingClientRect();
+  pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+  pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+});
+window.addEventListener('pointerdown', (e) => {
+  raycaster.setFromCamera(pointer, camera);
+  const hits = raycaster.intersectObjects(pickMeshes, false);
+  if (hits.length) {
+    const k = hits[0].object.userData.partKey;
+    if (focusKey === k) { focusKey = null; document.getElementById('focusBtn').textContent = 'ALL'; setVisible(null); }
+    else { focusKey = k; document.getElementById('focusBtn').textContent = 'ON · ' + DEFS[k].name; setVisible(k); }
+  }
+});
+
+/* ---------- animate ---------- */
+function animate() {
+  requestAnimationFrame(animate);
+  const bt = heartbeat(performance.now() * 0.001);
+  modelRoot.scale.setScalar(heartScale * bt);
+  modelRoot.position.copy(heartCenter).multiplyScalar(-heartScale * bt);
+  explode += ((dissect ? 1 : 0) - explode) * 0.06;
+  for (const p of parts) {
+    p.group.position.lerpVectors(new THREE.Vector3(0, 0, 0), EXPLODE[p.key], explode);
+    p.label.element.style.opacity = String(Math.max(0, Math.min(1, explode)));
+  }
+  raycaster.setFromCamera(pointer, camera);
+  const hits = raycaster.intersectObjects(pickMeshes, false);
+  const hovered = hits.length ? hits[0].object.userData.partKey : null;
+  hoverInfo.textContent = hovered ? `${DEFS[hovered].name} — ${DEFS[hovered].desc}` : 'Hover a part · click to focus it';
+  controls.update();
+  renderer.render(scene, camera);
+  labelRenderer.render(scene, camera);
+}
+
+window.addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+  labelRenderer.setSize(innerWidth, innerHeight);
+});
+
+loadHeart().then(() => {
+  parts.forEach((p) => p.group.traverse((o) => { if (o.isMesh) pickMeshes.push(o); }));
+  animate();
+});
+</script>
+</body>
+</html>

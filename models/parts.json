@@ -1,0 +1,85 @@
+{
+  "source": "BodyParts3D v4.0",
+  "source_url": "https://dbarchive.biosciencedbc.jp/en/bodyparts3d/download.html",
+  "license": "CC BY-SA 2.1 JP",
+  "citation": "Mitsuhashi N, Fujieda K, Tamura T, Kawamoto S, Takagi T, Okubo K. BodyParts3D: 3D structure database for anatomical concepts. Nucleic Acids Res. 2009;37:D782-5. doi:10.1093/nar/gkn613",
+  "parts": {
+    "right_atrium": {
+      "name": "Right atrium",
+      "fma": ["FMA7096"],
+      "color": "#4a7dd6",
+      "blood": "oxygen-poor",
+      "description": "Receives oxygen-poor blood from the body"
+    },
+    "left_atrium": {
+      "name": "Left atrium",
+      "fma": ["FMA7097"],
+      "color": "#d6483f",
+      "blood": "oxygen-rich",
+      "description": "Receives oxygen-rich blood from the lungs"
+    },
+    "right_ventricle": {
+      "name": "Right ventricle",
+      "fma": ["FMA7098"],
+      "color": "#3f68b8",
+      "blood": "oxygen-poor",
+      "description": "Pumps oxygen-poor blood to the lungs"
+    },
+    "left_ventricle": {
+      "name": "Left ventricle",
+      "fma": ["FMA7101"],
+      "color": "#c13a31",
+      "blood": "oxygen-rich",
+      "description": "Pumps oxygen-rich blood to the whole body"
+    },
+    "aorta": {
+      "name": "Aorta",
+      "fma": ["FMA3734"],
+      "color": "#b8382e",
+      "blood": "oxygen-rich",
+      "description": "Biggest artery — carries blood to the body"
+    },
+    "pulmonary_trunk": {
+      "name": "Pulmonary trunk",
+      "fma": ["FMA8612"],
+      "color": "#3f68b8",
+      "blood": "oxygen-poor",
+      "description": "Carries blood to the lungs"
+    },
+    "svc": {
+      "name": "Superior vena cava",
+      "fma": ["FMA4720"],
+      "color": "#5a86cc",
+      "blood": "oxygen-poor",
+      "description": "Oxygen-poor blood from the upper body"
+    },
+    "ivc": {
+      "name": "Inferior vena cava",
+      "fma": ["FMA10951"],
+      "color": "#5a86cc",
+      "blood": "oxygen-poor",
+      "description": "Oxygen-poor blood from the lower body"
+    },
+    "pulmonary_veins": {
+      "name": "Pulmonary veins",
+      "fma": ["FMA49911", "FMA49913", "FMA49914", "FMA49916"],
+      "color": "#e05a4f",
+      "blood": "oxygen-rich",
+      "description": "Oxygen-rich blood from the lungs"
+    },
+    "coronary_arteries": {
+      "name": "Coronary arteries",
+      "fma": ["FMA3802", "FMA3855", "FMA3862", "FMA3860"],
+      "color": "#c92a2a",
+      "blood": "oxygen-rich",
+      "description": "Vessels that feed the heart muscle itself"
+    },
+    "coronary_veins": {
+      "name": "Coronary veins",
+      "fma": ["FMA4707", "FMA4712", "FMA4713", "FMA4714"],
+      "color": "#3456a8",
+      "blood": "oxygen-poor",
+      "description": "Vessels that drain the heart muscle"
+    }
+  }
+}
