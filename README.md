@@ -1,5 +1,8 @@
 # biology-atlas — an open, interactive 3D biology atlas
 
+[![Live demo](https://img.shields.io/badge/Live_demo-%E2%9C%94-3fb950?style=for-the-badge&logo=github)](https://dishant707.github.io/biology-atlas/)
+[![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-ea4aaa?style=for-the-badge)](https://github.com/sponsors/Dishant707)
+
 A code-first library of **explorable, dissectable, downloadable 3D biology** — from
 molecules to organs — where every part is mapped to a canonical ontology and fully
 sourced. Built to be an asset for learners, teachers, and researchers.
