@@ -124,6 +124,18 @@ python3 scripts/fetch_heart.py
 This downloads the official BodyParts3D archive, extracts the heart meshes, and
 regenerates `models/manifest.json` + `models/parts.json`.
 
+## Support this work
+
+This atlas is free and open — but building interactive, dissectable 3D biology takes
+significant time. If you find it useful, please consider sponsoring to help fund
+new models.
+
+[![Sponsor Dishant707](https://img.shields.io/badge/Sponsor-%E2%9D%A4-ea4aaa?style=for-the-badge)](https://github.com/sponsors/Dishant707)
+
+**Hybrid model:** the base anatomy collection (heart, brain, …) is fully open — code
+(MIT) + models (CC BY-SA). Higher-detail custom builds, private/white-label models,
+and commercial licensing are available as funded work.
+
 ## License
 
 - **Code** (`web/`, `scripts/`, `models/*.json`): MIT — see [`LICENSE`](LICENSE).
