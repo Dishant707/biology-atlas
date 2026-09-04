@@ -208,21 +208,26 @@ async function loadHeart() {
     parts.push({ key: partKey, group, label, def, mat, meshes: [] });
   }
 
-  /* load all meshes in parallel (GitHub Pages serves over HTTP/2) */
-  await Promise.all(Object.entries(manifest).flatMap(([partKey, files]) =>
-    files.map((f) =>
-      loader.loadAsync(`../models/partof_BP3D_4.0_obj_99/${f}.obj`)
-        .then((obj) => {
-          obj.traverse((o) => { if (o.isMesh) { o.material = mats[partKey]; o.userData.partKey = partKey; } });
-          groups[partKey].add(obj);
-        })
-        .catch((e) => console.warn('failed', f, e))
-        .finally(() => {
-          loadedCount++;
-          loadingEl.textContent = `Loading heart parts… ${loadedCount}/${total}`;
-        })
-    )
-  ));
+  /* load meshes with bounded concurrency + timeout + one retry */
+  const queue = [];
+  for (const [partKey, files] of Object.entries(manifest)) for (const f of files) queue.push({ partKey, f });
+  const loadWithTimeout = (url, ms) => Promise.race([
+    loader.loadAsync(url),
+    new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms)),
+  ]);
+  async function loadOne({ partKey, f }) {
+    const url = `../models/partof_BP3D_4.0_obj_99/${f}.obj`;
+    try {
+      let obj;
+      try { obj = await loadWithTimeout(url, 15000); }
+      catch (e) { obj = await loadWithTimeout(url, 15000); }   // one retry
+      obj.traverse((o) => { if (o.isMesh) { o.material = mats[partKey]; o.userData.partKey = partKey; } });
+      groups[partKey].add(obj);
+    } catch (e) { console.warn('gave up', f, e); }
+    loadedCount++;
+    loadingEl.textContent = `Loading heart parts… ${loadedCount}/${total}`;
+  }
+  await Promise.all(Array.from({ length: 12 }, async () => { while (queue.length) await loadOne(queue.shift()); }));
 
   /* centre + scale the whole model, then orient it */
   const box = new THREE.Box3().setFromObject(modelRoot);

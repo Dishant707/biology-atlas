@@ -42,7 +42,7 @@
 </style>
 </head>
 <body>
-<a id="back" href="../">← Atlas</a>
+<a id="back" href="../../">← Atlas</a>
 <div id="panel">
   <h1>Human Brain — Real Anatomy</h1>
   <p>BodyParts3D data (CC BY-SA 2.1 JP) · color-coded lobes</p>
@@ -187,20 +187,26 @@ async function loadBrain() {
     parts.push({ key: partKey, group, label, def, mat, meshes: [] });
   }
 
-  await Promise.all(Object.entries(manifest).flatMap(([partKey, files]) =>
-    files.map((f) =>
-      loader.loadAsync(`../../models/brain/partof_BP3D_4.0_obj_99/${f}.obj`)
-        .then((obj) => {
-          obj.traverse((o) => { if (o.isMesh) { o.material = mats[partKey]; o.userData.partKey = partKey; } });
-          groups[partKey].add(obj);
-        })
-        .catch((e) => console.warn('failed', f, e))
-        .finally(() => {
-          loadedCount++;
-          loadingEl.textContent = `Loading brain parts… ${loadedCount}/${total}`;
-        })
-    )
-  ));
+  /* load meshes with bounded concurrency + timeout + one retry */
+  const queue = [];
+  for (const [partKey, files] of Object.entries(manifest)) for (const f of files) queue.push({ partKey, f });
+  const loadWithTimeout = (url, ms) => Promise.race([
+    loader.loadAsync(url),
+    new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms)),
+  ]);
+  async function loadOne({ partKey, f }) {
+    const url = `../../models/brain/partof_BP3D_4.0_obj_99/${f}.obj`;
+    try {
+      let obj;
+      try { obj = await loadWithTimeout(url, 15000); }
+      catch (e) { obj = await loadWithTimeout(url, 15000); }   // one retry
+      obj.traverse((o) => { if (o.isMesh) { o.material = mats[partKey]; o.userData.partKey = partKey; } });
+      groups[partKey].add(obj);
+    } catch (e) { console.warn('gave up', f, e); }
+    loadedCount++;
+    loadingEl.textContent = `Loading brain parts… ${loadedCount}/${total}`;
+  }
+  await Promise.all(Array.from({ length: 12 }, async () => { while (queue.length) await loadOne(queue.shift()); }));
 
   /* centre + scale + orient */
   const box = new THREE.Box3().setFromObject(modelRoot);
