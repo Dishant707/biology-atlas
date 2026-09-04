@@ -7,7 +7,7 @@ sourced. Built to be an asset for learners, teachers, and researchers.
 **Entry 1 — the human heart:** an in-browser 3D model with **11 dissectable parts**,
 mapped to the **Foundational Model of Anatomy (FMA)** ontology.
 
-**[Run locally](#run-locally) · [License](#license)**
+**Live demo: https://dishant707.github.io/biology-atlas/web/ · [License](#license)**
 
 ---
 
