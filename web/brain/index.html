@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Human Brain — Real Anatomy (BodyParts3D)</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #10131a; font-family: system-ui, -apple-system, sans-serif; }
+  canvas { display: block; }
+  #panel {
+    position: fixed; top: 16px; left: 16px; z-index: 10;
+    background: rgba(16,19,26,0.9); border: 1px solid #30363d; border-radius: 10px;
+    padding: 14px 16px; color: #e6edf3; width: 300px; backdrop-filter: blur(6px);
+  }
+  #panel h1 { font-size: 15px; margin: 0 0 6px; }
+  #panel p { font-size: 12px; color: #8b949e; margin: 0 0 12px; line-height: 1.4; }
+  .row { display: flex; align-items: center; justify-content: space-between; font-size: 12px; margin-bottom: 9px; gap: 8px; }
+  .row label { color: #c9d1d9; white-space: nowrap; }
+  button { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; border-radius: 6px; padding: 5px 12px; font-size: 12px; cursor: pointer; }
+  button:hover { background: #30363d; }
+  #dissectBtn { border-color: #3fb950; color: #3fb950; }
+  #stats { margin-top: 10px; font-size: 11px; color: #8b949e; border-top: 1px solid #30363d; padding-top: 8px; line-height: 1.5; }
+  #stats b { color: #c9d1d9; }
+  #hoverInfo { margin-top: 8px; font-size: 12px; color: #58a6ff; min-height: 16px; }
+  #loading { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; color: #8b949e; font-size: 14px; z-index: 5; }
+  .part-label { color: #e6edf3; background: rgba(22,27,34,0.94); border: 1px solid #58a6ff; border-radius: 5px; padding: 2px 8px; font-size: 11px; white-space: nowrap; pointer-events: none; }
+  #back { position: fixed; top: 16px; right: 16px; z-index: 10; color: #8b949e; text-decoration: none; font-size: 12px; border: 1px solid #30363d; border-radius: 6px; padding: 5px 12px; background: rgba(16,19,26,0.9); }
+  #back:hover { color: #c9d1d9; }
+</style>
+</head>
+<body>
+<a id="back" href="../">← Atlas</a>
+<div id="panel">
+  <h1>Human Brain — Real Anatomy</h1>
+  <p>BodyParts3D data (CC BY-SA 2.1 JP) · color-coded lobes</p>
+  <div class="row"><label>Dissect</label><button id="dissectBtn">OFF</button></div>
+  <div class="row"><label>Focus</label><button id="focusBtn">ALL</button></div>
+  <div id="stats">Loading…</div>
+  <div id="hoverInfo">Hover a part · click to focus it</div>
+</div>
+<div id="loading">Loading brain parts…</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+
+/* ---------- scene ---------- */
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x10131a);
+const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 200);
+camera.position.set(3.5, 2.5, 7.5);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.body.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 0, 0);
+controls.enableDamping = true;
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0x1a2330, 0.75));
+const key = new THREE.DirectionalLight(0xffffff, 2.0);
+key.position.set(5, 8, 6);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+scene.add(key);
+const rim = new THREE.DirectionalLight(0x88aaff, 0.6);
+rim.position.set(-4, -2, -5);
+scene.add(rim);
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+const labelRenderer = new CSS2DRenderer();
+labelRenderer.setSize(innerWidth, innerHeight);
+labelRenderer.domElement.style.position = 'absolute';
+labelRenderer.domElement.style.top = '0';
+labelRenderer.domElement.style.pointerEvents = 'none';
+document.body.appendChild(labelRenderer.domElement);
+
+/* ---------- parts ---------- */
+const DEFS = {
+  frontal_lobe:    { name: 'Frontal lobe',  color: 0x4a7dd6, desc: 'Thinking, planning, movement' },
+  parietal_lobe:   { name: 'Parietal lobe', color: 0x3fb950, desc: 'Touch and spatial awareness' },
+  temporal_lobe:   { name: 'Temporal lobe', color: 0xe3b341, desc: 'Hearing, memory, language' },
+  occipital_lobe:  { name: 'Occipital lobe',color: 0xd6483f, desc: 'Vision' },
+  cerebellum:      { name: 'Cerebellum',    color: 0x58b5a9, desc: 'Balance and coordination' },
+  brainstem:       { name: 'Brainstem',     color: 0x8a929b, desc: 'Breathing, heartbeat, reflexes' },
+  diencephalon:    { name: 'Diencephalon',  color: 0x9b6fc4, desc: 'The brain\'s sensory relay station' },
+  deep_structures: { name: 'Deep structures',color: 0xe8835a, desc: 'Basal ganglia — habit and reward circuits' },
+};
+/* explode offsets in MODEL millimetres (+Z = up in BodyParts3D) */
+const EXPLODE = {
+  frontal_lobe:    new THREE.Vector3(0, 30, 20),
+  parietal_lobe:   new THREE.Vector3(0, -30, 20),
+  temporal_lobe:   new THREE.Vector3(40, 0, -5),
+  occipital_lobe:  new THREE.Vector3(0, -35, -15),
+  cerebellum:      new THREE.Vector3(0, -40, -40),
+  brainstem:       new THREE.Vector3(0, -10, -55),
+  diencephalon:    new THREE.Vector3(0, 0, 25),
+  deep_structures: new THREE.Vector3(0, 0, 15),
+};
+
+const pivot = new THREE.Group();
+scene.add(pivot);
+const modelRoot = new THREE.Group();
+pivot.add(modelRoot);
+
+const parts = [];
+const stats = document.getElementById('stats');
+
+function makeLabel(text) {
+  const el = document.createElement('div');
+  el.className = 'part-label';
+  el.textContent = text;
+  return new CSS2DObject(el);
+}
+
+/* soft ground shadow */
+(function addGroundShadow() {
+  const c = document.createElement('canvas'); c.width = c.height = 256;
+  const x = c.getContext('2d');
+  const g = x.createRadialGradient(128, 128, 20, 128, 128, 128);
+  g.addColorStop(0, 'rgba(0,0,0,0.45)');
+  g.addColorStop(1, 'rgba(0,0,0,0)');
+  x.fillStyle = g; x.fillRect(0, 0, 256, 256);
+  const tex = new THREE.CanvasTexture(c);
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(7, 7), new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false }));
+  m.rotation.x = -Math.PI / 2;
+  m.position.y = -2.6;
+  scene.add(m);
+})();
+
+/* ---------- load real OBJ data ---------- */
+async function loadBrain() {
+  const res = await fetch('../../models/brain/manifest.json');
+  const manifest = await res.json();
+  const loader = new OBJLoader();
+
+  let loadedCount = 0, total = 0;
+  for (const k of Object.keys(manifest)) total += manifest[k].length;
+  const loadingEl = document.getElementById('loading');
+
+  const mats = {}, groups = {};
+  for (const partKey of Object.keys(manifest)) {
+    const def = DEFS[partKey];
+    const mat = new THREE.MeshPhysicalMaterial({
+      color: def.color, metalness: 0.0, roughness: 0.5,
+      sheen: 0.55, sheenColor: 0xffd9cc, clearcoat: 0.08, clearcoatRoughness: 0.5,
+    });
+    mats[partKey] = mat;
+    const group = new THREE.Group();
+    group.userData.partKey = partKey;
+    const label = makeLabel(def.name);
+    group.add(label);
+    modelRoot.add(group);
+    groups[partKey] = group;
+    parts.push({ key: partKey, group, label, def, meshes: [] });
+  }
+
+  await Promise.all(Object.entries(manifest).flatMap(([partKey, files]) =>
+    files.map((f) =>
+      loader.loadAsync(`../../models/brain/partof_BP3D_4.0_obj_99/${f}.obj`)
+        .then((obj) => {
+          obj.traverse((o) => { if (o.isMesh) { o.material = mats[partKey]; o.userData.partKey = partKey; } });
+          groups[partKey].add(obj);
+        })
+        .catch((e) => console.warn('failed', f, e))
+        .finally(() => {
+          loadedCount++;
+          loadingEl.textContent = `Loading brain parts… ${loadedCount}/${total}`;
+        })
+    )
+  ));
+
+  /* centre + scale + orient */
+  const box = new THREE.Box3().setFromObject(modelRoot);
+  const center = box.getCenter(new THREE.Vector3());
+  const size = box.getSize(new THREE.Vector3());
+  const scale = 4.5 / Math.max(size.x, size.y, size.z);
+  modelRoot.scale.setScalar(scale);
+  modelRoot.position.copy(center).multiplyScalar(-scale);
+  pivot.rotation.x = -Math.PI / 2;   // BodyParts3D +Z (up) -> scene +Y
+
+  for (const p of parts) {
+    const pb = new THREE.Box3().setFromObject(p.group);
+    const pc = pb.getCenter(new THREE.Vector3());
+    p.label.position.set(pc.x, pc.y, pc.z + pb.getSize(new THREE.Vector3()).z / 2 + 6);
+    p.group.traverse((o) => { if (o.isMesh) p.meshes.push(o); });
+  }
+
+  document.getElementById('loading').style.display = 'none';
+  stats.innerHTML = `<b>${parts.length}</b> parts · <b>${total}</b> real OBJ meshes<br>Source: BodyParts3D (CC BY-SA 2.1 JP)`;
+  controls.target.set(0, 0, 0);
+  controls.update();
+}
+
+/* ---------- interactions ---------- */
+let dissect = false, explode = 0, focusKey = null;
+document.getElementById('dissectBtn').addEventListener('click', (e) => { dissect = !dissect; e.target.textContent = dissect ? 'ON' : 'OFF'; });
+document.getElementById('focusBtn').addEventListener('click', (e) => { focusKey = null; e.target.textContent = 'ALL'; setVisible(null); });
+
+function setVisible(key) {
+  for (const p of parts) {
+    const show = key === null || p.key === key;
+    for (const m of p.meshes) m.visible = show;
+  }
+}
+
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+const pickMeshes = [];
+const hoverInfo = document.getElementById('hoverInfo');
+
+window.addEventListener('pointermove', (e) => {
+  const rect = renderer.domElement.getBoundingClientRect();
+  pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+  pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+});
+window.addEventListener('pointerdown', (e) => {
+  raycaster.setFromCamera(pointer, camera);
+  const hits = raycaster.intersectObjects(pickMeshes, false);
+  if (hits.length) {
+    const k = hits[0].object.userData.partKey;
+    if (focusKey === k) { focusKey = null; document.getElementById('focusBtn').textContent = 'ALL'; setVisible(null); }
+    else { focusKey = k; document.getElementById('focusBtn').textContent = 'ON · ' + DEFS[k].name; setVisible(k); }
+  }
+});
+
+/* ---------- animate ---------- */
+function animate() {
+  requestAnimationFrame(animate);
+  explode += ((dissect ? 1 : 0) - explode) * 0.06;
+  for (const p of parts) {
+    p.group.position.lerpVectors(new THREE.Vector3(0, 0, 0), EXPLODE[p.key], explode);
+    p.label.element.style.opacity = String(Math.max(0, Math.min(1, explode)));
+  }
+  raycaster.setFromCamera(pointer, camera);
+  const hits = raycaster.intersectObjects(pickMeshes, false);
+  const hovered = hits.length ? hits[0].object.userData.partKey : null;
+  hoverInfo.textContent = hovered ? `${DEFS[hovered].name} — ${DEFS[hovered].desc}` : 'Hover a part · click to focus it';
+  controls.update();
+  renderer.render(scene, camera);
+  labelRenderer.render(scene, camera);
+}
+
+window.addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+  labelRenderer.setSize(innerWidth, innerHeight);
+});
+
+loadBrain().then(() => {
+  parts.forEach((p) => p.group.traverse((o) => { if (o.isMesh) pickMeshes.push(o); }));
+  animate();
+});
+</script>
+</body>
+</html>

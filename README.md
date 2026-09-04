@@ -4,10 +4,13 @@ A code-first library of **explorable, dissectable, downloadable 3D biology** —
 molecules to organs — where every part is mapped to a canonical ontology and fully
 sourced. Built to be an asset for learners, teachers, and researchers.
 
-**Entry 1 — the human heart:** an in-browser 3D model with **11 dissectable parts**,
-mapped to the **Foundational Model of Anatomy (FMA)** ontology.
+**Models:**
+- **Heart** — 11 dissectable parts → [`web/`](web/) · [live](https://dishant707.github.io/biology-atlas/web/)
+- **Brain** — 8 dissectable parts (color-coded lobes) → [`web/brain/`](web/brain/) · [live](https://dishant707.github.io/biology-atlas/web/brain/)
 
-**Live demo: https://dishant707.github.io/biology-atlas/web/ · [License](#license)**
+Every part is mapped to the **Foundational Model of Anatomy (FMA)** ontology.
+
+**[Live demo](https://dishant707.github.io/biology-atlas/) · [License](#license)**
 
 ---
 
@@ -83,16 +86,24 @@ The full mapping is reproducible via `scripts/fetch_heart.py`.
 
 ```
 biology-atlas/
+├── index.html               # landing page (lists all models)
 ├── web/
-│   └── index.html          # the interactive viewer (Three.js, no build step)
+│   ├── index.html           # heart viewer
+│   └── brain/
+│       └── index.html       # brain viewer
 ├── models/
-│   ├── manifest.json       # machine-readable part → OBJ file list
-│   ├── parts.json          # data dictionary: FMA IDs, names, colors, descriptions
-│   ├── LICENSE.md          # data license + attribution (CC BY-SA 2.1 JP)
-│   └── partof_BP3D_4.0_obj_99/   # extracted .obj meshes
+│   ├── manifest.json        # heart: part → OBJ file list
+│   ├── parts.json           # heart: FMA IDs, names, colors, descriptions
+│   ├── LICENSE.md           # data license + attribution (CC BY-SA 2.1 JP)
+│   ├── partof_BP3D_4.0_obj_99/   # heart .obj meshes
+│   └── brain/
+│       ├── manifest.json    # brain: part → OBJ file list
+│       ├── parts.json       # brain: FMA IDs, names, colors, descriptions
+│       └── partof_BP3D_4.0_obj_99/  # brain .obj meshes
 ├── scripts/
-│   └── fetch_heart.py      # reproducible download + extraction + manifest
-├── LICENSE                 # MIT (code)
+│   ├── fetch_heart.py       # reproducible heart extraction
+│   └── fetch_brain.py       # reproducible brain extraction
+├── LICENSE                  # MIT (code)
 └── README.md
 ```
 

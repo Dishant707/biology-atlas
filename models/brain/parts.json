@@ -1,0 +1,56 @@
+{
+  "source": "BodyParts3D v4.0",
+  "source_url": "https://dbarchive.biosciencedbc.jp/en/bodyparts3d/download.html",
+  "license": "CC BY-SA 2.1 JP",
+  "citation": "Mitsuhashi N, Fujieda K, Tamura T, Kawamoto S, Takagi T, Okubo K. BodyParts3D: 3D structure database for anatomical concepts. Nucleic Acids Res. 2009;37:D782-5. doi:10.1093/nar/gkn613",
+  "parts": {
+    "frontal_lobe": {
+      "name": "Frontal lobe",
+      "fma": ["FMA72969", "FMA72970"],
+      "color": "#4a7dd6",
+      "description": "Thinking, planning, movement"
+    },
+    "parietal_lobe": {
+      "name": "Parietal lobe",
+      "fma": ["FMA72973", "FMA72974"],
+      "color": "#3fb950",
+      "description": "Touch and spatial awareness"
+    },
+    "temporal_lobe": {
+      "name": "Temporal lobe",
+      "fma": ["FMA72971", "FMA72972"],
+      "color": "#e3b341",
+      "description": "Hearing, memory, language"
+    },
+    "occipital_lobe": {
+      "name": "Occipital lobe",
+      "fma": ["FMA72975", "FMA72976"],
+      "color": "#d6483f",
+      "description": "Vision"
+    },
+    "cerebellum": {
+      "name": "Cerebellum",
+      "fma": ["FMA67944"],
+      "color": "#58b5a9",
+      "description": "Balance and coordination"
+    },
+    "brainstem": {
+      "name": "Brainstem",
+      "fma": ["FMA79876"],
+      "color": "#8a929b",
+      "description": "Breathing, heartbeat, reflexes"
+    },
+    "diencephalon": {
+      "name": "Diencephalon",
+      "fma": ["FMA62001"],
+      "color": "#9b6fc4",
+      "description": "The brain's sensory relay station"
+    },
+    "deep_structures": {
+      "name": "Deep structures",
+      "fma": ["FMA50801"],
+      "color": "#e8835a",
+      "description": "Basal ganglia — habit and reward circuits"
+    }
+  }
+}
