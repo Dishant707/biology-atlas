@@ -23,7 +23,22 @@
   #stats b { color: #c9d1d9; }
   #hoverInfo { margin-top: 8px; font-size: 12px; color: #58a6ff; min-height: 16px; }
   #loading { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; color: #8b949e; font-size: 14px; z-index: 5; }
-  .part-label { color: #e6edf3; background: rgba(22,27,34,0.94); border: 1px solid #58a6ff; border-radius: 5px; padding: 2px 8px; font-size: 11px; white-space: nowrap; pointer-events: none; }
+  .part-label {
+    color: #f0f3f6; background: rgba(16,19,26,0.92); border: 1px solid #58a6ff;
+    border-radius: 999px; padding: 4px 12px; font-size: 12px; font-weight: 600;
+    white-space: nowrap; pointer-events: none; box-shadow: 0 2px 10px rgba(0,0,0,0.45);
+  }
+  #back { position: fixed; top: 16px; right: 16px; z-index: 10; color: #8b949e; text-decoration: none; font-size: 12px; border: 1px solid #30363d; border-radius: 6px; padding: 5px 12px; background: rgba(16,19,26,0.9); }
+  #back:hover { color: #c9d1d9; }
+  #legend { margin-top: 10px; border-top: 1px solid #30363d; padding-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 11px;
+    background: #21262d; color: #c9d1d9; border: 1px solid #30363d; border-radius: 999px;
+    padding: 3px 9px; cursor: pointer;
+  }
+  .chip:hover { border-color: #58a6ff; }
+  .chip .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .chip.active { border-color: #58a6ff; color: #e6edf3; background: #263042; }
 </style>
 </head>
 <body>
@@ -34,7 +49,9 @@
   <div class="row"><label>Focus</label><button id="focusBtn">ALL</button></div>
   <div id="stats">Loading…</div>
   <div id="hoverInfo">Hover a part · click to focus it</div>
+  <div id="legend"></div>
 </div>
+<a id="back" href="../">← Atlas</a>
 <div id="loading">Loading heart parts…</div>
 
 <script type="importmap">
@@ -172,6 +189,8 @@ async function loadHeart() {
     const isVessel = ['coronary_arteries','coronary_veins','aorta','pulmonary_trunk','svc','ivc','pulmonary_veins'].includes(partKey);
     const mat = new THREE.MeshPhysicalMaterial({
       color: def.color,
+      emissive: def.color,
+      emissiveIntensity: 0,
       metalness: 0.0,
       roughness: isVessel ? 0.35 : 0.55,
       sheen: isVessel ? 0.0 : 0.6,
@@ -186,7 +205,7 @@ async function loadHeart() {
     group.add(label);
     modelRoot.add(group);
     groups[partKey] = group;
-    parts.push({ key: partKey, group, label, def, meshes: [] });
+    parts.push({ key: partKey, group, label, def, mat, meshes: [] });
   }
 
   /* load all meshes in parallel (GitHub Pages serves over HTTP/2) */
@@ -232,8 +251,10 @@ async function loadHeart() {
 
 /* ---------- interactions ---------- */
 let dissect = false, explode = 0, focusKey = null;
-document.getElementById('dissectBtn').addEventListener('click', (e) => { dissect = !dissect; e.target.textContent = dissect ? 'ON' : 'OFF'; });
-document.getElementById('focusBtn').addEventListener('click', (e) => { focusKey = null; e.target.textContent = 'ALL'; setVisible(null); });
+const dissectBtn = document.getElementById('dissectBtn');
+const focusBtn = document.getElementById('focusBtn');
+dissectBtn.addEventListener('click', () => { dissect = !dissect; dissectBtn.textContent = dissect ? 'ON' : 'OFF'; });
+focusBtn.addEventListener('click', () => setFocus(null));
 
 function setVisible(key) {
   for (const p of parts) {
@@ -241,6 +262,26 @@ function setVisible(key) {
     for (const m of p.meshes) m.visible = show;
   }
 }
+
+function setFocus(key) {
+  focusKey = key;
+  if (key === null) { focusBtn.textContent = 'ALL'; setVisible(null); }
+  else { focusBtn.textContent = 'ON · ' + DEFS[key].name; setVisible(key); }
+  for (const c of document.querySelectorAll('.chip')) c.classList.toggle('active', c.dataset.key === key);
+}
+
+/* legend chips (click to focus a part) */
+(function buildLegend() {
+  const legend = document.getElementById('legend');
+  for (const key of Object.keys(DEFS)) {
+    const chip = document.createElement('button');
+    chip.className = 'chip';
+    chip.dataset.key = key;
+    chip.innerHTML = `<span class="dot" style="background:#${DEFS[key].color.toString(16).padStart(6, '0')}"></span>${DEFS[key].name}`;
+    chip.addEventListener('click', () => setFocus(focusKey === key ? null : key));
+    legend.appendChild(chip);
+  }
+})();
 
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
@@ -257,8 +298,7 @@ window.addEventListener('pointerdown', (e) => {
   const hits = raycaster.intersectObjects(pickMeshes, false);
   if (hits.length) {
     const k = hits[0].object.userData.partKey;
-    if (focusKey === k) { focusKey = null; document.getElementById('focusBtn').textContent = 'ALL'; setVisible(null); }
-    else { focusKey = k; document.getElementById('focusBtn').textContent = 'ON · ' + DEFS[k].name; setVisible(k); }
+    setFocus(focusKey === k ? null : k);
   }
 });
 
@@ -271,7 +311,11 @@ function animate() {
   explode += ((dissect ? 1 : 0) - explode) * 0.06;
   for (const p of parts) {
     p.group.position.lerpVectors(new THREE.Vector3(0, 0, 0), EXPLODE[p.key], explode);
-    p.label.element.style.opacity = String(Math.max(0, Math.min(1, explode)));
+    let op = 0;
+    if (focusKey) op = (p.key === focusKey) ? 1 : 0;
+    else op = Math.max(0, Math.min(1, explode));
+    p.label.element.style.opacity = String(op);
+    p.mat.emissiveIntensity = (focusKey === p.key) ? 0.35 : 0;
   }
   raycaster.setFromCamera(pointer, camera);
   const hits = raycaster.intersectObjects(pickMeshes, false);
