@@ -11,7 +11,7 @@ Explore and dissect real human anatomy in your browser — free and open.
 
 ## Connect
 
-- [LinkedIn](https://www.linkedin.com/in/YOUR_HANDLE)
+- [LinkedIn](https://www.linkedin.com/in/dishant-patidar-159698380/)
 
 ---
 
