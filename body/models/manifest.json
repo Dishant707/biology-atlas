@@ -1,0 +1,267 @@
+{
+  "cardiovascular": {
+    "arteries": {
+      "file": "parts/cardiovascular/arteries.glb",
+      "elements": 638,
+      "label": "Arteries"
+    },
+    "heart": {
+      "file": "parts/cardiovascular/heart.glb",
+      "elements": 35,
+      "label": "Heart"
+    },
+    "veins": {
+      "file": "parts/cardiovascular/veins.glb",
+      "elements": 388,
+      "label": "Veins"
+    }
+  },
+  "skeletal": {
+    "cartilage": {
+      "file": "parts/skeletal/cartilage.glb",
+      "elements": 12,
+      "label": "Cartilage"
+    },
+    "clavicle": {
+      "file": "parts/skeletal/clavicle.glb",
+      "elements": 2,
+      "label": "Clavicle"
+    },
+    "femur": {
+      "file": "parts/skeletal/femur.glb",
+      "elements": 2,
+      "label": "Femur"
+    },
+    "foot": {
+      "file": "parts/skeletal/foot.glb",
+      "elements": 58,
+      "label": "Foot"
+    },
+    "forearm": {
+      "file": "parts/skeletal/forearm.glb",
+      "elements": 4,
+      "label": "Forearm"
+    },
+    "hand": {
+      "file": "parts/skeletal/hand.glb",
+      "elements": 54,
+      "label": "Hand"
+    },
+    "humerus": {
+      "file": "parts/skeletal/humerus.glb",
+      "elements": 2,
+      "label": "Humerus"
+    },
+    "ligaments": {
+      "file": "parts/skeletal/ligaments.glb",
+      "elements": 18,
+      "label": "Ligaments"
+    },
+    "lower_leg": {
+      "file": "parts/skeletal/lower_leg.glb",
+      "elements": 4,
+      "label": "Lower Leg"
+    },
+    "mandible": {
+      "file": "parts/skeletal/mandible.glb",
+      "elements": 1,
+      "label": "Mandible"
+    },
+    "patella": {
+      "file": "parts/skeletal/patella.glb",
+      "elements": 2,
+      "label": "Patella"
+    },
+    "pelvis": {
+      "file": "parts/skeletal/pelvis.glb",
+      "elements": 2,
+      "label": "Pelvis"
+    },
+    "ribcage": {
+      "file": "parts/skeletal/ribcage.glb",
+      "elements": 41,
+      "label": "Ribcage"
+    },
+    "scapula": {
+      "file": "parts/skeletal/scapula.glb",
+      "elements": 2,
+      "label": "Scapula"
+    },
+    "skull": {
+      "file": "parts/skeletal/skull.glb",
+      "elements": 23,
+      "label": "Skull"
+    },
+    "spine": {
+      "file": "parts/skeletal/spine.glb",
+      "elements": 48,
+      "label": "Spine"
+    }
+  },
+  "muscular": {
+    "head_neck": {
+      "file": "parts/muscular/head_neck.glb",
+      "elements": 81,
+      "label": "Head & neck muscles"
+    },
+    "lower_limb": {
+      "file": "parts/muscular/lower_limb.glb",
+      "elements": 102,
+      "label": "Lower limb muscles"
+    },
+    "muscles": {
+      "file": "parts/muscular/muscles.glb",
+      "elements": 46,
+      "label": "Muscles"
+    },
+    "trunk": {
+      "file": "parts/muscular/trunk.glb",
+      "elements": 96,
+      "label": "Trunk"
+    },
+    "upper_limb": {
+      "file": "parts/muscular/upper_limb.glb",
+      "elements": 110,
+      "label": "Upper limb muscles"
+    }
+  },
+  "nervous": {
+    "brain": {
+      "file": "parts/nervous/brain.glb",
+      "elements": 109,
+      "label": "Brain"
+    },
+    "cranial_nerves": {
+      "file": "parts/nervous/cranial_nerves.glb",
+      "elements": 6,
+      "label": "Cranial nerves"
+    },
+    "nerves": {
+      "file": "parts/nervous/nerves.glb",
+      "elements": 30,
+      "label": "Nerves"
+    },
+    "spinal_cord": {
+      "file": "parts/nervous/spinal_cord.glb",
+      "elements": 1,
+      "label": "Spinal cord"
+    }
+  },
+  "organs": {
+    "adrenal": {
+      "file": "parts/organs/adrenal.glb",
+      "elements": 2,
+      "label": "Adrenal"
+    },
+    "ear": {
+      "file": "parts/organs/ear.glb",
+      "elements": 3,
+      "label": "Ear"
+    },
+    "esophagus": {
+      "file": "parts/organs/esophagus.glb",
+      "elements": 1,
+      "label": "Esophagus"
+    },
+    "eye": {
+      "file": "parts/organs/eye.glb",
+      "elements": 39,
+      "label": "Eye"
+    },
+    "fascia": {
+      "file": "parts/organs/fascia.glb",
+      "elements": 8,
+      "label": "Fascia"
+    },
+    "gallbladder": {
+      "file": "parts/organs/gallbladder.glb",
+      "elements": 2,
+      "label": "Gallbladder"
+    },
+    "kidney": {
+      "file": "parts/organs/kidney.glb",
+      "elements": 2,
+      "label": "Kidney"
+    },
+    "large_intestine": {
+      "file": "parts/organs/large_intestine.glb",
+      "elements": 11,
+      "label": "Large intestine"
+    },
+    "larynx": {
+      "file": "parts/organs/larynx.glb",
+      "elements": 5,
+      "label": "Larynx"
+    },
+    "liver": {
+      "file": "parts/organs/liver.glb",
+      "elements": 23,
+      "label": "Liver"
+    },
+    "lungs_bronchi": {
+      "file": "parts/organs/lungs_bronchi.glb",
+      "elements": 100,
+      "label": "Lungs & bronchi"
+    },
+    "male_reproductive": {
+      "file": "parts/organs/male_reproductive.glb",
+      "elements": 12,
+      "label": "Male reproductive"
+    },
+    "pancreas": {
+      "file": "parts/organs/pancreas.glb",
+      "elements": 4,
+      "label": "Pancreas"
+    },
+    "pharynx_oral": {
+      "file": "parts/organs/pharynx_oral.glb",
+      "elements": 36,
+      "label": "Pharynx & oral cavity"
+    },
+    "pituitary": {
+      "file": "parts/organs/pituitary.glb",
+      "elements": 1,
+      "label": "Pituitary"
+    },
+    "skin": {
+      "file": "parts/organs/skin.glb",
+      "elements": 3,
+      "label": "Skin"
+    },
+    "small_intestine": {
+      "file": "parts/organs/small_intestine.glb",
+      "elements": 56,
+      "label": "Small intestine"
+    },
+    "spleen": {
+      "file": "parts/organs/spleen.glb",
+      "elements": 1,
+      "label": "Spleen"
+    },
+    "stomach": {
+      "file": "parts/organs/stomach.glb",
+      "elements": 1,
+      "label": "Stomach"
+    },
+    "thymus": {
+      "file": "parts/organs/thymus.glb",
+      "elements": 2,
+      "label": "Thymus"
+    },
+    "trachea": {
+      "file": "parts/organs/trachea.glb",
+      "elements": 1,
+      "label": "Trachea"
+    },
+    "ureter": {
+      "file": "parts/organs/ureter.glb",
+      "elements": 2,
+      "label": "Ureter"
+    },
+    "urinary_bladder": {
+      "file": "parts/organs/urinary_bladder.glb",
+      "elements": 2,
+      "label": "Urinary bladder"
+    }
+  }
+}
