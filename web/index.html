@@ -39,6 +39,18 @@
   .chip:hover { border-color: #58a6ff; }
   .chip .dot { width: 8px; height: 8px; border-radius: 50%; }
   .chip.active { border-color: #58a6ff; color: #e6edf3; background: #263042; }
+  /* mobile: collapse panel into a hamburger menu + quick Dissect button */
+  #mobileBar { display: none; }
+  @media (max-width: 768px) {
+    #panel { display: none; left: 8px; right: 8px; top: 64px; width: auto; max-height: calc(100vh - 80px); overflow-y: auto; }
+    #panel.open { display: block; }
+    #mobileBar { display: flex; position: fixed; top: 10px; left: 10px; z-index: 20; gap: 8px; align-items: center; }
+    #menuBtn { width: 46px; height: 46px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; background: rgba(16,19,26,0.92); border: 1px solid #30363d; border-radius: 10px; cursor: pointer; padding: 0; }
+    #menuBtn span { display: block; width: 20px; height: 2.5px; background: #e6edf3; border-radius: 2px; }
+    #quickDissect { height: 46px; padding: 0 18px; font-size: 15px; font-weight: 700; background: #1f6feb; color: #fff; border: none; border-radius: 10px; }
+    #quickDissect.active { background: #3fb950; }
+    #back { top: 14px; right: 10px; }
+  }
 </style>
 </head>
 <body>
@@ -50,6 +62,10 @@
   <div id="stats">Loading…</div>
   <div id="hoverInfo">Hover a part · click to focus it</div>
   <div id="legend"></div>
+</div>
+<div id="mobileBar">
+  <button id="menuBtn" aria-label="Menu"><span></span><span></span><span></span></button>
+  <button id="quickDissect">Dissect</button>
 </div>
 <a id="back" href="../">← Atlas</a>
 <div id="loading">Loading heart parts…</div>
@@ -258,7 +274,19 @@ async function loadHeart() {
 let dissect = false, explode = 0, focusKey = null;
 const dissectBtn = document.getElementById('dissectBtn');
 const focusBtn = document.getElementById('focusBtn');
-dissectBtn.addEventListener('click', () => { dissect = !dissect; dissectBtn.textContent = dissect ? 'ON' : 'OFF'; });
+const menuBtn = document.getElementById('menuBtn');
+const quickDissect = document.getElementById('quickDissect');
+function syncQuickDissect() {
+  quickDissect.textContent = dissect ? 'Assemble' : 'Dissect';
+  quickDissect.classList.toggle('active', dissect);
+}
+dissectBtn.addEventListener('click', () => {
+  dissect = !dissect;
+  dissectBtn.textContent = dissect ? 'ON' : 'OFF';
+  syncQuickDissect();
+});
+menuBtn.addEventListener('click', () => document.getElementById('panel').classList.toggle('open'));
+quickDissect.addEventListener('click', () => dissectBtn.click());
 focusBtn.addEventListener('click', () => setFocus(null));
 
 function setVisible(key) {
